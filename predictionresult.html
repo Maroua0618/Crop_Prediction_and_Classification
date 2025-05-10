@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Prediction Results</title>
+    <link rel="stylesheet" href="predictionresult.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Crop Prediction Results</h1>
+
+        <!-- Best Crop Section -->
+        <div id="bestCropSection" class="result-section">
+            <h2>Recommended Crop</h2>
+            <div class="best-crop-card">
+                <p id="bestCrop" class="highlight">Loading...</p>
+                <p id="suitabilityScore">Suitability: Loading...</p>
+                <p id="confidenceScore">Confidence: Loading...</p>
+            </div>
+        </div>
+
+        <!-- User Input Parameters -->
+        <div id="inputParamsSection" class="result-section">
+            <h2>Your Soil Parameters</h2>
+            <div class="params-grid">
+                <div class="param-item"><span>Nitrogen (N):</span> <span id="paramN">Loading...</span></div>
+                <div class="param-item"><span>Phosphorus (P):</span> <span id="paramP">Loading...</span></div>
+                <div class="param-item"><span>Potassium (K):</span> <span id="paramK">Loading...</span></div>
+                <div class="param-item"><span>Temperature (°C):</span> <span id="paramTemp">Loading...</span></div>
+                <div class="param-item"><span>Humidity (%):</span> <span id="paramHumidity">Loading...</span></div>
+                <div class="param-item"><span>pH:</span> <span id="paramPh">Loading...</span></div>
+                <div class="param-item"><span>Rainfall (mm):</span> <span id="paramRainfall">Loading...</span></div>
+            </div>
+        </div>
+
+        <!-- Crop Description -->
+        <div id="cropDescriptionSection" class="result-section">
+            <h2>About the Recommended Crop</h2>
+            <p id="cropDescription">Loading crop details...</p>
+        </div>
+
+        <!-- Resources and Costs -->
+        <div id="resourcesSection" class="result-section">
+            <h2>Resources and Estimated Costs</h2>
+            <div id="resourcesList">Loading resource requirements...</div>
+            <p id="totalCost">Estimated Total Cost: Loading...</p>
+        </div>
+
+        <!-- Resulting Features After Change -->
+        <div id="resultingFeaturesSection" class="result-section">
+            <h2>Resulting Soil Features After Interventions</h2>
+            <div class="params-grid">
+                <div class="param-item"><span>Nitrogen (N):</span> <span id="resultN">Loading...</span></div>
+                <div class="param-item"><span>Phosphorus (P):</span> <span id="resultP">Loading...</span></div>
+                <div class="param-item"><span>Potassium (K):</span> <span id="resultK">Loading...</span></div>
+                <div class="param-item"><span>Temperature (°C):</span> <span id="resultTemp">Loading...</span></div>
+                <div class="param-item"><span>Humidity (%):</span> <span id="resultHumidity">Loading...</span></div>
+                <div class="param-item"><span>pH:</span> <span id="resultPh">Loading...</span></div>
+                <div class="param-item"><span>Rainfall (mm):</span> <span id="resultRainfall">Loading...</span></div>
+            </div>
+        </div>
+
+         <div id="timelineSection" class="result-section future-work">
+            <h2>Soil Adaptation Timeline (Coming Soon)</h2>
+            <p id="timelineMessage">This feature will provide a detailed timeline for soil adaptation based on interventions. Stay tuned for updates!</p>
+            <canvas id="timelineChart"></canvas>
+        </div>
+        <!-- Algorithm Results -->
+        <div id="algorithmResultsSection" class="result-section">
+            <h2>Algorithm Results</h2>
+            <table id="algorithmResultsTable">
+                <thead>
+                    <tr>
+                        <th>Algorithm</th>
+                        <th>Recommended Crop</th>
+                        <th>Score</th>
+                        <th>Score Type</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div id="tableSection" class="result-section">
+            <h2>Detailed Crop Analysis</h2>
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th>Crop</th>
+                        <th>Suitability Score (%)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- A* Expansion -->
+        <div id="astarExpansion" class="result-section">
+            <h2>A* Expansion</h2>
+            <p id="astarContent">Loading A* expansion details...</p>
+        </div>
+
+        <!-- Genetic Expansion -->
+        <div id="geneticExpansion" class="result-section">
+            <h2>Genetic Algorithm Expansion</h2>
+            <p id="geneticContent">Loading genetic algorithm expansion details...</p>
+        </div>
+
+        <!-- Soil Adaptation Timeline (Future Work) -->
+       
+
+        <!-- Crop Suitability Chart -->
+        <div id="chartSection" class="result-section">
+            <h2>Crop Suitability Scores</h2>
+            <canvas id="suitabilityChart"></canvas>
+        </div>
+
+        <!-- Detailed Results Table -->
+    
+
+        <!-- Back Button -->
+        <div class="button-container">
+            <a href="prediction.html" class="back-button">Back to Prediction Form</a>
+        </div>
+    </div>
+    <script src="predictionresult.js"></script>
+</body>
+</html>
