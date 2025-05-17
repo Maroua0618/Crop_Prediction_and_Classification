@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Prediction Results</title>
+    <link rel="stylesheet" href="predictionresult.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Crop Prediction Results</h1>
+
+        <div class="result-section">
+            <h2>Recommended Crop</h2>
+            <div class="best-crop-card">
+                <div class="highlight" id="bestCrop">Loading...</div>
+                <p id="suitabilityScore">Suitability: Loading...</p>
+                <p id="confidenceScore">Confidence: Loading...</p>
+            </div>
+        </div>
+
+        <div class="result-section">
+            <h2>Your Soil Parameters</h2>
+            <div class="params-grid">
+                <div class="param-item"><span>Nitrogen (N):</span><span id="paramN">Loading...</span></div>
+                <div class="param-item"><span>Phosphorus (P):</span><span id="paramP">Loading...</span></div>
+                <div class="param-item"><span>Potassium (K):</span><span id="paramK">Loading...</span></div>
+                <div class="param-item"><span>Temperature (°C):</span><span id="paramTemp">Loading...</span></div>
+                <div class="param-item"><span>Humidity (%):</span><span id="paramHumidity">Loading...</span></div>
+                <div class="param-item"><span>pH:</span><span id="paramPh">Loading...</span></div>
+                <div class="param-item"><span>Rainfall (mm):</span><span id="paramRainfall">Loading...</span></div>
+            </div>
+        </div>
+
+        <div class="result-section">
+            <h2>About the Recommended Crop</h2>
+            <div id="cropDescription">Loading crop details...</div>
+        </div>
+
+        <div class="result-section">
+            <h2>Resources and Estimated Costs</h2>
+            <div id="resourcesList">Loading resource requirements...</div>
+            <div id="totalCost">Estimated Total Cost: Loading...</div>
+        </div>
+
+        <div class="result-section">
+            <h2>Resulting Soil Features After Interventions</h2>
+            <div class="params-grid">
+                <div class="param-item"><span>Nitrogen (N):</span><span id="resultN">Loading...</span></div>
+                <div class="param-item"><span>Phosphorus (P):</span><span id="resultP">Loading...</span></div>
+                <div class="param-item"><span>Potassium (K):</span><span id="resultK">Loading...</span></div>
+                <div class="param-item"><span>Temperature (°C):</span><span id="resultTemp">Loading...</span></div>
+                <div class="param-item"><span>Humidity (%):</span><span id="resultHumidity">Loading...</span></div>
+                <div class="param-item"><span>pH:</span><span id="resultPh">Loading...</span></div>
+                <div class="param-item"><span>Rainfall (mm):</span><span id="resultRainfall">Loading...</span></div>
+            </div>
+        </div>
+
+        <div class="result-section">
+            <h2>Crop Suitability Scores</h2>
+            <canvas id="suitabilityChart"></canvas>
+        </div>
+
+        <div class="result-section">
+            <h2>Algorithm Results</h2>
+            <table id="algorithmResultsTable">
+                <thead>
+                    <tr>
+                        <th>Algorithm</th>
+                        <th>Recommended Crop</th>
+                        <th>Score</th>
+                        <th>Score Type</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="result-section">
+            <h2>Detailed Crop Analysis</h2>
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th>Crop</th>
+                        <th>Suitability Score (%)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="result-section">
+            <h2>Algorithm Expansions</h2>
+            <div class="expansion-tabs">
+                <button class="expansion-tab" onclick="openExpansionTab(event, 'astarContent')">A* Algorithm</button>
+                <button class="expansion-tab" onclick="openExpansionTab(event, 'geneticContent')">Genetic Algorithm</button>
+                <button class="expansion-tab" onclick="openExpansionTab(event, 'cspContent')">CSP Algorithm</button>
+                <button class="expansion-tab" onclick="openExpansionTab(event, 'greedyContent')">Greedy Algorithm</button>
+                <button class="expansion-tab" onclick="openExpansionTab(event, 'comparisonContent')">Algorithm Comparison</button>
+            </div>
+
+            <div id="astarContent" class="expansion-content">
+                <h3>A* Algorithm Details</h3>
+                <img src="astar_search_tree.png" alt="A* Search Tree" style="max-width: 100%; margin: 20px 0; display: none;" id="astarTreeImage">
+                <div id="astarTreeVis" style="height: 400px; width: 100%;"></div>
+                <div id="astarDetails">Loading A* expansion details...</div>
+            </div>
+
+            <div id="geneticContent" class="expansion-content">
+                <h3>Genetic Algorithm Details</h3>
+                <div>Loading genetic algorithm expansion details...</div>
+            </div>
+
+            <div id="cspContent" class="expansion-content">
+                <h3>CSP Algorithm Details</h3>
+                <div>Loading CSP expansion details...</div>
+            </div>
+
+            <div id="greedyContent" class="expansion-content">
+                <h3>Greedy Algorithm Details</h3>
+                <img src="greedy_search_tree.png" alt="Greedy Search Tree" style="max-width: 100%; margin: 20px 0; display: none;" id="greedyTreeImage">
+                <div id="greedyTreeVis" style="height: 400px; width: 100%;"></div>
+                <div id="greedyDetails">Loading greedy algorithm expansion details...</div>
+            </div>
+
+            <div id="comparisonContent" class="expansion-content">
+                <h3>Algorithm Comparison</h3>
+                <div class="algorithm-comparison">
+                    <div class="algorithm-card">
+                        <h3>A* Algorithm</h3>
+                        <div class="list-heading">Strengths:</div>
+                        <ul id="astarStrengths"></ul>
+                        <div class="list-heading">Weaknesses:</div>
+                        <ul id="astarWeaknesses"></ul>
+                        <div class="recommendation" id="astarRecommendation"></div>
+                    </div>
+                    <div class="algorithm-card">
+                        <h3>Genetic Algorithm</h3>
+                        <div class="list-heading">Strengths:</div>
+                        <ul id="geneticStrengths"></ul>
+                        <div class="list-heading">Weaknesses:</div>
+                        <ul id="geneticWeaknesses"></ul>
+                        <div class="recommendation" id="geneticRecommendation"></div>
+                    </div>
+                    <div class="algorithm-card">
+                        <h3>CSP Algorithm</h3>
+                        <div class="list-heading">Strengths:</div>
+                        <ul id="cspStrengths"></ul>
+                        <div class="list-heading">Weaknesses:</div>
+                        <ul id="cspWeaknesses"></ul>
+                        <div class="recommendation" id="cspRecommendation"></div>
+                    </div>
+                    <div class="algorithm-card">
+                        <h3>Greedy Algorithm</h3>
+                        <div class="list-heading">Strengths:</div>
+                        <ul id="greedyStrengths"></ul>
+                        <div class="list-heading">Weaknesses:</div>
+                        <ul id="greedyWeaknesses"></ul>
+                        <div class="recommendation" id="greedyRecommendation"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-section">
+            <h2>Soil Adaptation Timeline</h2>
+            <div id="timelineMessage">This feature will provide a detailed timeline for soil adaptation based on interventions. Stay tuned for updates!</div>
+            <canvas id="timelineChart"></canvas>
+        </div>
+
+        <div class="button-container">
+            <a href="prediction.html" class="back-button">Back to Prediction Form</a>
+        </div>
+    </div>
+    <script src="predictionresult.js"></script>
+</body>
+</html>
