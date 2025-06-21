@@ -84,10 +84,14 @@
             identify the crop! Get accurate results based on our extensive
             agricultural database.
           </p>
-          <button class="service-button">
+          <a
+            href="{{ url_for('classification_page') }}"
+            class="service-button"
+            style="text-decoration: none; display: inline-block"
+          >
             Classify Now
             <span class="toggle-dot"></span>
-          </button>
+          </a>
         </div>
       </div>
     </div>

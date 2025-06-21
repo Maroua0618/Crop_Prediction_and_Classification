@@ -149,6 +149,48 @@ def prediction_results():
     
     return render_template('predictionresult.html')
 
+# classification routes
+@app.route('/classification')
+def classification_page():
+    return render_template('classification.html')
+
+@app.route('/api/predict', methods=['POST'])
+def classify_crop():
+    data = request.form
+    
+    # Debug print to see what's being received
+    print("Received classification data:", data)
+    
+    # Validate required fields
+    required_fields = ['Nitrogen', 'Phosphorus', 'Potassium', 'Ph', 'Temperature', 'Humidity', 'Rainfall']
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
+    
+    # Here you would normally process the data with your ML model
+    # For now, we'll redirect to the results page with the data
+    # Store the classification data in session for the results page
+    session['classification_data'] = {
+        'nitrogen': float(data.get('Nitrogen')),
+        'phosphorus': float(data.get('Phosphorus')),
+        'potassium': float(data.get('Potassium')),
+        'ph': float(data.get('Ph')),
+        'temperature': float(data.get('Temperature')),
+        'humidity': float(data.get('Humidity')),
+        'rainfall': float(data.get('Rainfall'))
+    }
+    
+    return jsonify({'success': True, 'redirect': '/classification-results'}), 200
+
+@app.route('/classification-results')
+def classification_results():
+    # Check if classification data exists in session
+    if 'classification_data' not in session:
+        flash('Please submit classification data first')
+        return redirect(url_for('classification_page'))
+    
+    return render_template('classificationresult.html')
+
 # Admin route to view database entries
 @app.route('/admin/users')
 def admin_users():
