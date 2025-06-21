@@ -3,7 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="Home.css" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/Home.css') }}"
+    />
+
     <title>FarmEazy - Integrated Crop Management System</title>
   </head>
   <body>
@@ -14,17 +18,24 @@
 
     <!-- Navigation -->
     <div class="nav">
-      <a href="index.html">Home</a>
-      <a href="#">About Us</a>
-      <a href="#contact">Contact Us</a>
-      <a href="#">Login</a>
-      <a href="#">SignUp</a>
+      <a href="{{ url_for('index', filename='index.html') }}">Home</a>
+      {% if session.user_id %}
+      <a href="{{ url_for('profile', filename='profile.html') }}">Profile</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+      <a href="{{ url_for('login_page', filename='login_page.html') }}"
+        >Login</a
+      >
+      <a href="{{ url_for('signup_page', filename='signup_page.html') }}"
+        >Sign Up</a
+      >
+      {% endif %}
     </div>
 
     <!-- Hero Section -->
     <div
       class="hero"
-      style="background-image: url('img/Rectangle\ 5.png')"
+      style="background-image: url('{{ url_for('static', filename='img/Rectangle5.png') }}')"
     ></div>
 
     <!-- Services Section -->
@@ -35,8 +46,8 @@
         <div class="service-card">
           <div class="service-icon">
             <img
-              src="img/predict.png"
-              alt=""
+              src="{{ url_for('static', filename='img/predict.png') }}"
+              alt="Crop Prediction"
               style="height: 80%; width: 100%"
             />
           </div>
@@ -47,29 +58,35 @@
             crop for a successful harvest! Our advanced algorithms consider soil
             type, climate, and seasonal factors.
           </p>
-          <a href="prediction.html" class="service-button">Predict Now</a>
+          <a
+            href="{{ url_for('prediction_page') }}"
+            class="service-button"
+            style="text-decoration: none; display: inline-block"
+          >
+            Predict Now
+            <span class="toggle-dot"></span>
+          </a>
         </div>
 
         <!-- Service 2 -->
         <div class="service-card">
           <div class="service-icon">
             <img
-              src="img/classify.png"
-              alt=""
+              src="{{ url_for('static', filename='img/classify.png') }}"
+              alt="Crop Classification"
               style="height: 80%; width: 100%"
             />
           </div>
 
           <p class="service-description">
-            <strong
-              >Let smart classification guide your crops to the perfect
-              choice!</strong
-            >
+            <strong>Wondering what's growing in your field?</strong>
             Just enter your environmental and soil conditions, and our AI will
-            identify the most suitable crops! Get accurate results based on our
-            extensive agricultural database.
+            identify the crop! Get accurate results based on our extensive
+            agricultural database.
           </p>
-          <a href="classify.html" class="service-button">Classify Now</a>
+          <button class="service-button">
+            Classify Now
+            <span class="toggle-dot"></span>
           </button>
         </div>
       </div>
@@ -81,7 +98,7 @@
         <!-- Slide 1 -->
         <div
           class="slide active"
-          style="background-image: url('img/pexels-pixabay-164504.jpg')"
+          style="background-image: url('{{ url_for('static', filename='img/pexels-pixabay-164504.jpg') }}')"
         >
           <div class="mission-content">
             <h2>Our Mission is to make crop production more Profitable</h2>
@@ -91,9 +108,7 @@
         <!-- Slide 2 -->
         <div
           class="slide"
-          style="
-            background-image: url('img/Agriculture-with-Data-Driven-Strategies.jpg');
-          "
+          style="background-image: url('{{ url_for('static', filename='img/Agriculture-with-Data-Driven-Strategies.jpg') }}')"
         >
           <div class="mission-content">
             <h2>We aim to make farming more Efficient through AI</h2>
@@ -103,33 +118,34 @@
         <!-- Slide 3 -->
         <div
           class="slide"
-          style="background-image: url('img/pexels-binyaminmellish-169523.jpg')"
+          style="background-image: url('{{ url_for('static', filename='img/pexels-binyaminmellish-169523.jpg') }}')"
         >
           <div class="mission-content">
             <h2>Creating Safe and Sustainable agricultural practices</h2>
           </div>
         </div>
-      </div>
-      <!-- Slide 4 -->
-      <div
-        class="slide"
-        style="background-image: url('img/1_cmFsmlRK2rxjiaZSvVmI9A.png')"
-      >
-        <div class="mission-content">
-          <h2>Utilizing Data-Driven Insights for Smarter Decisions</h2>
+
+        <!-- Slide 4 -->
+        <div
+          class="slide"
+          style="background-image: url('{{ url_for('static', filename='img/1_cmFsmlRK2rxjiaZSvVmI9A.png') }}')"
+        >
+          <div class="mission-content">
+            <h2>Utilizing Data-Driven Insights for Smarter Decisions</h2>
+          </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div
+          class="slide"
+          style="background-image: url('{{ url_for('static', filename='img/pexels-quang-nguyen-vinh-222549-2132250.jpg') }}')"
+        >
+          <div class="mission-content">
+            <h2>Innovating Sustainable Farming for a Better Future</h2>
+          </div>
         </div>
       </div>
-      <!-- Slide 5 -->
-      <div
-        class="slide"
-        style="
-          background-image: url('img/pexels-quang-nguyen-vinh-222549-2132250.jpg');
-        "
-      >
-        <div class="mission-content">
-          <h2>Innovating Sustainable Farming for a Better Future</h2>
-        </div>
-      </div>
+
       <div class="slideshow-dots">
         <div class="dot active"></div>
         <div class="dot"></div>
@@ -332,6 +348,6 @@
       </div>
     </div>
 
-    <script src="Home.js"></script>
+    <script src="{{ url_for('static', filename='js/Home.js') }}"></script>
   </body>
 </html>

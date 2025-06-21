@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmEazy - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/loginSignup.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">FarmEazy</div>
+            <nav>
+                <ul>
+                    <li><a href={{ url_for('login_page', filename='login_page.html') }} class="active">Login</a></li>
+                    <li><a href={{ url_for('signup_page', filename='signup_page.html') }}>SignUp</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <main>
+            <div class="auth-card">
+                <div class="avatar">
+                    <div class="avatar-icon">👤</div>
+                </div>
+                <h2 class="auth-title">Login to your account</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" name="password" required>
+                    </div>
+                    <button type="submit" class="btn-auth">Login</button>
+                </form>
+                <p class="redirect-text">Don't have an account? <a href={{ url_for('signup_page', filename='signup_page.html') }} class="redirect-link">SignUp</a></p>
+            </div>
+        </main>
+        
+        <footer>
+            <div class="footer-info">
+                <h3 class="footer-title">About FarmEazy</h3>
+                <p class="footer-text">
+                    FarmEazy transforms agriculture by providing a comprehensive digital solution 
+                    that helps farmers manage production, distribution, resources, and access insights 
+                    that increase margins.
+                </p>
+            </div>
+            <div class="footer-contacts">
+                <h3 class="footer-title">Contacts</h3>
+                <div class="contact-item">
+                    <span class="contact-icon">▶</span>
+                    <span>Lorem Street, 123</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">✉</span>
+                    <span>info@gmail.com</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">☏</span>
+                    <span>+1-202-12345678</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">🌐</span>
+                    <span>www.farmeazy.com</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/loginSignup.js') }}"></script>
+</body>
+</html>
