@@ -30,15 +30,27 @@ def predict_crop():
         except (ValueError, TypeError):
             return jsonify({'success': False, 'message': 'Invalid input data. Please enter valid numbers.'}), 400
 
+        # Input validation
+        if environmental_data[0] < 0 or environmental_data[1] < 0 or environmental_data[2] < 0:
+            return jsonify({'success': False, 'message': 'Nutrients (Nitrogen, Phosphorus, Potassium) must be non-negative'}), 400
         if environmental_data[5] < 0 or environmental_data[5] > 14:
             return jsonify({'success': False, 'message': 'pH value must be between 0 and 14'}), 400
         if environmental_data[4] < 0 or environmental_data[4] > 100:
             return jsonify({'success': False, 'message': 'Humidity must be between 0 and 100%'}), 400
-        if environmental_data[6] < 0:
-            return jsonify({'success': False, 'message': 'Rainfall cannot be negative'}), 400
+        if environmental_data[6] < 20:
+            return jsonify({'success': False, 'message': 'Rainfall must be greater than 20mm'}), 400
+
+        print(f"Processing environmental data: {environmental_data}")
 
         # Create the problem instance
-        problem = CropPredictionProblem(environmental_data, os.path.join(DATA_DIR, 'Crop_Data.csv'))
+        try:
+            from AI_engine.Problem_definition import CropState
+            initial_state = CropState(environmental_data)
+            problem = CropPredictionProblem(initial_state, os.path.join(DATA_DIR, 'Crop_Data.csv'))
+            print(f"Problem created successfully. Initial state: {problem.initial_state}")
+        except Exception as e:
+            print(f"Error creating problem: {str(e)}")
+            return jsonify({'success': False, 'message': f'Error initializing problem: {str(e)}'}), 500
 
         results = {
             'astar': {
@@ -60,9 +72,11 @@ def predict_crop():
         }
 
         # --- A* Search ---
+        print("Starting A* Search...")
         try:
             graph_search = GraphSearch(problem)
-            node, crop_or_list, cost = graph_search.search("A*", max_depth=3)
+            node, crop_or_list, cost = graph_search.search("A*", max_depth=4)
+            print(f"A* Search completed. Node: {node}, Result: {crop_or_list}, Cost: {cost}")
 
             if node and isinstance(crop_or_list, str):
                 # Perfect match found
@@ -76,15 +90,17 @@ def predict_crop():
                     'message': f'Perfect match found: {crop_or_list.title()}',
                     'error': None
                 }
-            elif isinstance(crop_or_list, list):
+                print(f"A* Perfect match: {crop_or_list}")
+            elif isinstance(crop_or_list, list) and len(crop_or_list) > 0:
                 # Alternative recommendations
                 recommendations = []
-                for crop, alt_cost, node_item in crop_or_list[:5]:
-                    recommendations.append({
-                        'crop': crop.title(),
-                        'cost': round(alt_cost, 2) if alt_cost else 0,
-                        'state': node_item.state.environment.tolist() if node_item and hasattr(node_item.state, 'environment') else None
-                    })
+                for item in crop_or_list[:5]:
+                    if isinstance(item, tuple) and len(item) >= 3:
+                        crop, alt_cost, node_item = item
+                        recommendations.append({
+                            'crop': crop.title() if isinstance(crop, str) else str(crop),
+                            'cost': round(alt_cost, 2) if alt_cost else 0
+                        })
                 results['astar'] = {
                     'success': True,
                     'perfect_match': None,
@@ -92,52 +108,83 @@ def predict_crop():
                     'message': 'No perfect match found, showing best alternatives',
                     'error': None
                 }
+                print(f"A* Alternatives: {len(recommendations)} found")
             else:
                 results['astar'] = {
                     'success': False,
                     'perfect_match': None,
                     'recommendations': [],
-                    'message': 'No suitable crops found',
+                    'message': 'No suitable crops found with A* search',
                     'error': None
                 }
+                print("A* No results found")
         except Exception as e:
-            print(f"A* Search Error: {str(e)}")  # Debug output
+            error_msg = str(e)
+            print(f"A* Search Error: {error_msg}")
             results['astar'] = {
                 'success': False,
-                'error': str(e),
+                'error': error_msg,
                 'perfect_match': None,
                 'recommendations': [],
-                'message': f'Error in A* search: {str(e)}'
+                'message': f'Error in A* search: {error_msg}'
             }
 
         # --- Genetic Algorithm ---
+        print("Starting Genetic Algorithm...")
         try:
             ga = GeneticAlgorithm(problem)
             best_solution, best_fitness, best_crop, top_crops = ga.solve("predict")
+            print(f"GA completed. Best crop: {best_crop}, Fitness: {best_fitness}")
 
-            formatted_interventions = {}
-            for i, (intervention_name, _) in enumerate(problem.interventions):
-                formatted_interventions[intervention_name] = round(best_solution[i], 1)
+            if best_solution and best_crop:
+                formatted_interventions = {}
+                if hasattr(problem, 'interventions') and problem.interventions:
+                    for i, (intervention_name, _) in enumerate(problem.interventions):
+                        if i < len(best_solution):
+                            formatted_interventions[intervention_name] = round(best_solution[i], 1)
 
-            results['genetic'] = {
-                'success': True,
-                'best_crop': best_crop.title() if best_crop else 'Unknown',
-                'fitness': best_fitness,
-                'interventions': formatted_interventions,
-                'top_crops': [(crop.title(), round(score, 1)) for crop, score in top_crops],
-                'message': f'Best crop with interventions: {best_crop.title() if best_crop else "Unknown"}',
-                'error': None
-            }
+                # Ensure top_crops is properly formatted
+                formatted_top_crops = []
+                if top_crops:
+                    for item in top_crops[:5]:
+                        if isinstance(item, tuple) and len(item) >= 2:
+                            crop, score = item
+                            formatted_top_crops.append((
+                                crop.title() if isinstance(crop, str) else str(crop), 
+                                round(float(score), 1)
+                            ))
+
+                results['genetic'] = {
+                    'success': True,
+                    'best_crop': best_crop.title() if isinstance(best_crop, str) else str(best_crop),
+                    'fitness': round(float(best_fitness), 4),
+                    'interventions': formatted_interventions,
+                    'top_crops': formatted_top_crops,
+                    'message': f'Best crop with interventions: {best_crop.title() if isinstance(best_crop, str) else str(best_crop)}',
+                    'error': None
+                }
+                print(f"GA Success: {results['genetic']['best_crop']}")
+            else:
+                results['genetic'] = {
+                    'success': False,
+                    'best_crop': None,
+                    'fitness': 0,
+                    'interventions': {},
+                    'top_crops': [],
+                    'message': 'Genetic algorithm did not find optimal solution',
+                    'error': None
+                }
         except Exception as e:
-            print(f"Genetic Algorithm Error: {str(e)}")  # Debug output
+            error_msg = str(e)
+            print(f"Genetic Algorithm Error: {error_msg}")
             results['genetic'] = {
                 'success': False, 
-                'error': str(e),
+                'error': error_msg,
                 'best_crop': None,
                 'fitness': 0,
                 'interventions': {},
                 'top_crops': [],
-                'message': f'Error in genetic algorithm: {str(e)}'
+                'message': f'Error in genetic algorithm: {error_msg}'
             }
 
         # Store the prediction data in session with correct structure
@@ -146,11 +193,13 @@ def predict_crop():
             'results': results
         }
 
+        print(f"Final results: A* success={results['astar']['success']}, GA success={results['genetic']['success']}")
         return jsonify({'success': True, 'redirect': '/prediction-results'}), 200
 
     except Exception as e:
-        print(f"General Error: {str(e)}")  # Debug output
-        return jsonify({'success': False, 'message': f'Error processing prediction: {str(e)}'}), 500
+        error_msg = str(e)
+        print(f"General Error: {error_msg}")
+        return jsonify({'success': False, 'message': f'Error processing prediction: {error_msg}'}), 500
 
 
 @prediction_bp.route('/prediction-results')
