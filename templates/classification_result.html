@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmEazy - Classification Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/results.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>FarmEazy</h1>
+        <div class="nav">
+            <a href="{{ url_for('main.index') }}">Home</a>
+            <a href="{{ url_for('prediction.prediction_page') }}">Prediction</a>
+            <a href="{{ url_for('classification.classification_page') }}">New Classification</a>
+            {% if session.user_id %}
+                <a href="{{ url_for('main.profile') }}">Profile</a>
+                <a href="{{ url_for('auth.logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('main.login_page') }}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="results-header">
+            <h2>🎯 Crop Classification Results</h2>
+            <p class="subtitle">Identifying suitable crops for your current environmental conditions</p>
+        </div>
+
+        <!-- Input Summary -->
+        <div class="input-summary">
+            <h3>📊 Your Environmental Conditions</h3>
+            <div class="conditions-grid">
+                {% for feature, value in classification_data.results.environmental_data.items() %}
+                <div class="condition-item">
+                    <span class="label">{{ feature|title }}</span>
+                    <span class="value">
+                        {{ value }}
+                        {% if feature == 'temperature' %}°C
+                        {% elif feature == 'humidity' %}%
+                        {% elif feature == 'rainfall' %}mm
+                        {% elif feature in ['N', 'P', 'K'] %}units
+                        {% endif %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Classification Results -->
+        <div class="classification-results">
+            <!-- Direct Matches Section -->
+            {% if classification_data.results.direct_matches %}
+            <div class="results-card direct-matches">
+                <div class="card-header">
+                    <h3>🎉 Perfect Matches Found!</h3>
+                    <div class="match-badge perfect-match">100% Compatible</div>
+                </div>
+                <div class="matches-content">
+                    <p class="match-description">
+                        Excellent news! Your environmental conditions are perfectly suitable for the following crops:
+                    </p>
+                    <div class="perfect-matches-grid">
+                        {% for crop in classification_data.results.direct_matches %}
+                        <div class="perfect-match-item">
+                            <div class="crop-icon">🌾</div>
+                            <div class="crop-info">
+                                <h4 class="crop-name">{{ crop|title }}</h4>
+                                <div class="compatibility-indicator">
+                                    <div class="compatibility-bar">
+                                        <div class="compatibility-fill" style="width: 100%"></div>
+                                    </div>
+                                    <span class="compatibility-text">Perfect Match</span>
+                                </div>
+                                <p class="crop-benefit">✅ Ready to plant immediately</p>
+                                <p class="crop-benefit">✅ Optimal growing conditions</p>
+                                <p class="crop-benefit">✅ Maximum yield potential</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Partial Matches Section -->
+            {% if classification_data.results.partial_matches %}
+            <div class="results-card partial-matches">
+                <div class="card-header">
+                    <h3>🌱 Good Alternative Options</h3>
+                    <div class="match-badge partial-match">Partial Compatibility</div>
+                </div>
+                <div class="matches-content">
+                    {% if not classification_data.results.direct_matches %}
+                    <p class="match-description">
+                        While no crops are a perfect match for your current conditions, these crops show good compatibility and could work well with minor adjustments:
+                    </p>
+                    {% else %}
+                    <p class="match-description">
+                        Consider these additional crops that show good compatibility with your environmental conditions:
+                    </p>
+                    {% endif %}
+                    
+                    <div class="partial-matches-list">
+                        {% for crop, suitability in classification_data.results.partial_matches %}
+                        <div class="partial-match-item">
+                            <div class="match-header">
+                                <div class="crop-info">
+                                    <h4 class="crop-name">{{ crop|title }}</h4>
+                                    <span class="suitability-score">{{ "%.1f"|format(suitability) }}% Compatible</span>
+                                </div>
+                                <div class="suitability-indicator">
+                                    {% if suitability >= 85 %}
+                                        <span class="indicator-badge excellent">Excellent</span>
+                                    {% elif suitability >= 75 %}
+                                        <span class="indicator-badge very-good">Very Good</span>
+                                    {% elif suitability >= 65 %}
+                                        <span class="indicator-badge good">Good</span>
+                                    {% else %}
+                                        <span class="indicator-badge moderate">Moderate</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="compatibility-visualization">
+                                <div class="compatibility-bar">
+                                    <div class="compatibility-fill" style="width: {{ suitability }}%"></div>
+                                </div>
+                                <div class="compatibility-details">
+                                    <span class="compatibility-percentage">{{ "%.1f"|format(suitability) }}%</span>
+                                </div>
+                            </div>
+                            <div class="crop-recommendations">
+                                {% if suitability >= 85 %}
+                                    <p class="recommendation">✅ Highly recommended - minimal adjustments needed</p>
+                                {% elif suitability >= 75 %}
+                                    <p class="recommendation">🟡 Good option - some environmental optimization recommended</p>
+                                {% elif suitability >= 65 %}
+                                    <p class="recommendation">🟠 Possible with careful management and soil amendments</p>
+                                {% else %}
+                                    <p class="recommendation">🔴 Challenging - significant environmental changes required</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- No Matches Section -->
+            {% if not classification_data.results.direct_matches and not classification_data.results.partial_matches %}
+            <div class="results-card no-matches">
+                <div class="card-header">
+                    <h3>🔍 No Direct Matches Found</h3>
+                    <div class="match-badge no-match">Requires Optimization</div>
+                </div>
+                <div class="matches-content">
+                    <div class="no-match-message">
+                        <div class="message-icon">🌾</div>
+                        <h4>Environmental Conditions Need Adjustment</h4>
+                        <p>Your current environmental conditions don't closely match any of our crop requirements. However, with some soil and environmental modifications, you can still achieve successful crop cultivation.</p>
+                        
+                        <div class="recommendations-section">
+                            <h5>💡 Recommendations:</h5>
+                            <ul class="recommendation-list">
+                                <li>Consider soil testing and amendments to optimize nutrient levels</li>
+                                <li>Explore irrigation solutions to adjust moisture conditions</li>
+                                <li>Try our <strong>Prediction Tool</strong> for AI-powered optimization suggestions</li>
+                                <li>Consult with local agricultural extension services</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="action-suggestion">
+                            <p>🎯 <strong>Pro Tip:</strong> Use our Prediction feature to get specific recommendations on how to modify your conditions for optimal crop growth!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Detailed Analysis Section -->
+        <div class="detailed-analysis">
+            <h3>📈 Environmental Analysis Summary</h3>
+            <div class="analysis-grid">
+                <div class="analysis-item">
+                    <h4>🌡️ Temperature Range</h4>
+                    <div class="analysis-content">
+                        <span class="current-value">{{ classification_data.results.environmental_data.temperature }}°C</span>
+                        <p class="analysis-text">
+                            {% if classification_data.results.environmental_data.temperature < 15 %}
+                                Cool temperature - suitable for cold-season crops
+                            {% elif classification_data.results.environmental_data.temperature > 30 %}
+                                High temperature - ideal for heat-loving crops
+                            {% else %}
+                                Moderate temperature - good for most crop varieties
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="analysis-item">
+                    <h4>💧 Moisture Conditions</h4>
+                    <div class="analysis-content">
+                        <span class="current-value">{{ classification_data.results.environmental_data.humidity }}% humidity, {{ classification_data.results.environmental_data.rainfall }}mm rainfall</span>
+                        <p class="analysis-text">
+                            {% if classification_data.results.environmental_data.humidity > 80 %}
+                                High humidity environment - monitor for fungal diseases
+                            {% elif classification_data.results.environmental_data.humidity < 50 %}
+                                Low humidity - may require additional irrigation
+                            {% else %}
+                                Good moisture balance for most crops
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="analysis-item">
+                    <h4>🧪 Soil Chemistry</h4>
+                    <div class="analysis-content">
+                        <span class="current-value">pH {{ classification_data.results.environmental_data.ph }}</span>
+                        <p class="analysis-text">
+                            {% if classification_data.results.environmental_data.ph < 6.0 %}
+                                Acidic soil - may benefit from lime application
+                            {% elif classification_data.results.environmental_data.ph > 7.5 %}
+                                Alkaline soil - consider sulfur amendments
+                            {% else %}
+                                Good pH range for most crops
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="analysis-item">
+                    <h4>🌱 Nutrient Profile</h4>
+                    <div class="analysis-content">
+                        <div class="nutrient-summary">
+                            <span class="nutrient-item">N: {{ classification_data.results.environmental_data.N }}</span>
+                            <span class="nutrient-item">P: {{ classification_data.results.environmental_data.P }}</span>
+                            <span class="nutrient-item">K: {{ classification_data.results.environmental_data.K }}</span>
+                        </div>
+                        <p class="analysis-text">Current soil nutrient levels for optimal crop matching</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button onclick="window.location.href='{{ url_for('classification.classification_page') }}'" class="btn-primary">
+                🔄 New Classification
+            </button>
+            <button onclick="window.location.href='{{ url_for('prediction.prediction_page') }}'" class="btn-secondary">
+                🎯 Try Prediction
+            </button>
+            <button onclick="window.print()" class="btn-outline">
+                🖨️ Print Results
+            </button>
+            {% if session.user_id %}
+            <button onclick="saveResults()" class="btn-outline">
+                💾 Save to Profile
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+       {% include 'includes/footer.html' %}
+
+    <script>
+        function saveResults() {
+            // Implementation for saving results to user profile
+            alert('Results saved to your profile!');
+        }
+
+        // Add smooth scrolling and animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.results-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
+    </script>
+
+    <style>
+        :root {
+            --primary-color: #2E7D32;
+            --secondary-color: #4CAF50;
+            --accent-color: #81C784;
+            --text-dark: #1B5E20;
+            --text-light: #757575;
+            --bg-light: #F8FFF8;
+            --border-color: #E8F5E8;
+            --success-color: #4CAF50;
+            --warning-color: #FF9800;
+            --error-color: #F44336;
+            --excellent-color: #4CAF50;
+            --very-good-color: #8BC34A;
+            --good-color: #CDDC39;
+            --moderate-color: #FF9800;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #ffffff 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+
+        .nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .results-header h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }

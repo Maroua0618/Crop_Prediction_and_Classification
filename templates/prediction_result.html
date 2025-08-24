@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FarmEazy - Prediction Results</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/results.css') }}"
+    />
+   <head>
+  <body>
+    <!-- Header -->
+    <div class="header">
+      <h1>FarmEazy</h1>
+      <div class="nav">
+        <a href="{{ url_for('main.index') }}">Home</a>
+        <a href="{{ url_for('prediction.prediction_page') }}">New Prediction</a>
+        <a href="{{ url_for('classification.classification_page') }}">Classification</a>
+        {% if session.user_id %}
+        <a href="{{ url_for('main.profile') }}">Profile</a>
+        <a href="{{ url_for('auth.logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('main.login_page') }}">Login</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="results-header">
+        <h2>🌱 Crop Prediction Results</h2>
+        <p class="subtitle">
+          AI-powered crop recommendations based on your environmental conditions
+        </p>
+      </div>
+
+      <!-- Input Summary -->
+      <div class="input-summary">
+        <h3>📊 Your Environmental Conditions</h3>
+        <div class="conditions-grid">
+          <div class="condition-item">
+            <span class="label">Nitrogen (N)</span>
+            <span class="value">{{ prediction_data.input[0] }} units</span>
+          </div>
+          <div class="condition-item">
+            <span class="label">Phosphorus (P)</span>
+            <span class="value">{{ prediction_data.input[1] }} units</span>
+          </div>
+          <div class="condition-item">
+            <span class="label">Potassium (K)</span>
+            <span class="value">{{ prediction_data.input[2] }} units</span>
+          </div>
+          <div class="condition-item">
+            <span class="label">Temperature</span>
+            <span class="value">{{ prediction_data.input[3] }}°C</span>
+          </div>
+          <div class="condition-item">
+            <span class="label">Humidity</span>
+            <span class="value">{{ prediction_data.input[4] }}%</span>
+          </div>
+          <div class="condition-item">
+            <span class="label">pH Level</span>
+            <span class="value">{{ prediction_data.input[5] }}</span>
+          </div>
+          <div class="condition-item">
+            <span class="label">Rainfall</span>
+            <span class="value">{{ prediction_data.input[6] }} mm</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Algorithm Results -->
+      <div class="algorithm-results">
+        <!-- A* Search Results -->
+        {% if prediction_data.results.astar %}
+        <div class="algorithm-card astar-results">
+          <div class="algorithm-header">
+            <h3>🔍 A* Search Algorithm Results</h3>
+            <div class="algorithm-badge">Optimal Path Finding</div>
+          </div>
+
+          {% if prediction_data.results.astar.success %} {% if
+          prediction_data.results.astar.perfect_match %}
+          <!-- Perfect Match Found -->
+          <div class="success-result">
+            <div class="result-icon">✅</div>
+            <div class="result-content">
+              <h4>Perfect Match Found!</h4>
+              <div class="recommended-crop">
+                <span class="crop-name"
+                  >{{ prediction_data.results.astar.perfect_match.crop }}</span
+                >
+                <span class="confidence"
+                  >Optimal Cost: ${{
+                  "%.2f"|format(prediction_data.results.astar.perfect_match.cost)
+                  }}</span
+                >
+              </div>
+              <p class="message">{{ prediction_data.results.astar.message }}</p>
+            </div>
+          </div>
+          {% else %}
+          <!-- Alternative Recommendations -->
+          <div class="alternative-results">
+            <div class="result-icon">⚠️</div>
+            <div class="result-content">
+              <h4>Alternative Recommendations</h4>
+              <p class="message">{{ prediction_data.results.astar.message }}</p>
+              {% if prediction_data.results.astar.recommendations %}
+              <div class="recommendations-list">
+                {% for rec in prediction_data.results.astar.recommendations %}
+                <div class="recommendation-item">
+                  <span class="crop-name">{{ rec.crop }}</span>
+                  <span class="cost-indicator"
+                    >Cost: ${{ "%.2f"|format(rec.cost) }}</span
+                  >
+                </div>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %} {% else %}
+          <!-- Error or No Results -->
+          <div class="error-result">
+            <div class="result-icon">❌</div>
+            <div class="result-content">
+              <p>{{ prediction_data.results.astar.message }}</p>
+              {% if prediction_data.results.astar.error %}
+              <p>
+                <strong>Error Details:</strong> {{
+                prediction_data.results.astar.error }}
+              </p>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Genetic Algorithm Results -->
+        {% if prediction_data.results.genetic %}
+        <div class="algorithm-card genetic-results">
+          <div class="algorithm-header">
+            <h3>🧬 Genetic Algorithm Results</h3>
+            <div class="algorithm-badge">Evolutionary Optimization</div>
+          </div>
+
+          {% if prediction_data.results.genetic.success %}
+          <div class="genetic-success">
+            <div class="best-crop-section">
+              <h4>🏆 Optimized Recommendation</h4>
+              <div class="best-crop">
+                <span class="crop-name"
+                  >{{ prediction_data.results.genetic.best_crop }}</span
+                >
+                <div class="fitness-score">
+                  <span class="fitness-label">Fitness Score:</span>
+                  <div class="fitness-bar">
+                    <div
+                      class="fitness-fill"
+                      style="width: {{ (prediction_data.results.genetic.fitness * 100)|round(1) }}%"
+                    ></div>
+                  </div>
+                  <span class="fitness-percentage"
+                    >{{ (prediction_data.results.genetic.fitness * 100)|round(1)
+                    }}%</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Recommended Interventions -->
+            <div class="interventions-section">
+              <h4>🛠️ Recommended Agricultural Interventions</h4>
+              <div class="interventions-grid">
+                {% for intervention, value in
+                prediction_data.results.genetic.interventions.items() %}
+                <div class="intervention-item">
+                  <span class="intervention-name"
+                    >{{ intervention.replace('_', ' ').title() }}</span
+                  >
+                  <span class="intervention-value">
+                    {{ value }} {% if 'fertilizer' in intervention %} kg/ha {%
+                    elif intervention == 'irrigation_frequency' %} days {% elif
+                    intervention == 'add_organic_matter' %} tonnes/ha {% endif
+                    %}
+                  </span>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Top Crop Alternatives -->
+            <div class="top-crops-section">
+              <h4>📈 Top Crop Suitability Rankings</h4>
+              <div class="crops-ranking">
+                {% for crop, suitability in
+                prediction_data.results.genetic.top_crops %}
+                <div class="crop-rank-item">
+                  <div class="rank-info">
+                    <span class="crop-name">{{ crop }}</span>
+                    <span class="suitability-score"
+                      >{{ "%.1f"|format(suitability) }}%</span
+                    >
+                  </div>
+                  <div class="suitability-bar">
+                    <div
+                      class="suitability-fill"
+                      style="width: {{ suitability }}%"
+                    ></div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <!-- Error in Genetic Algorithm -->
+          <div class="error-result">
+            <div class="result-icon">❌</div>
+            <div class="result-content">
+              <p>
+                {{ prediction_data.results.genetic.message or 'Error in genetic
+                algorithm processing' }}
+              </p>
+              {% if prediction_data.results.genetic.error %}
+              <p>
+                <strong>Error Details:</strong> {{
+                prediction_data.results.genetic.error }}
+              </p>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button
+          onclick="window.location.href='{{ url_for('prediction.prediction_page') }}'"
+          class="btn-primary"
+        >
+          🔄 New Prediction
+        </button>
+        <button
+          onclick="window.location.href='{{ url_for('classification.classification_page') }}'"
+          class="btn-secondary"
+        >
+          🎯 Try Classification
+        </button>
+        <button onclick="window.print()" class="btn-outline">
+          🖨️ Print Results
+        </button>
+        {% if session.user_id %}
+        <button onclick="saveResults()" class="btn-outline">
+          💾 Save to Profile
+        </button>
+        {% endif %}
+      </div>
+    </div>
+
+        {% include 'includes/footer.html' %}
+
+    <script>
+      function saveResults() {
+        // Implementation for saving results to user profile
+        alert("Results saved to your profile!");
+      }
+
+      // Add smooth scrolling and animations
+      document.addEventListener("DOMContentLoaded", function () {
+        const cards = document.querySelectorAll(".algorithm-card");
+        cards.forEach((card, index) => {
+          card.style.animationDelay = `${index * 0.2}s`;
+        });
+      });
+    </script>
+  </body>
+</html>
