@@ -1,6 +1,7 @@
 import random
 import copy
 from AI_engine.NodeClass import Node
+from .Problem_definition import CropPredictionProblem , CropState
 
 class GeneticAlgorithm:
     """Genetic Algorithm for crop intervention optimization."""

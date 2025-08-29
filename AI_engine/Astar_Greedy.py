@@ -54,8 +54,7 @@ class GraphSearch:
         while frontier:
             current_node = heapq.heappop(frontier)
             nodes_expanded += 1
-            
-            print(f"Expanding node {nodes_expanded}: {current_node.state}")
+        
 
             # Track last expanded for visualization
             self.last_expanded = current_node
@@ -72,7 +71,7 @@ class GraphSearch:
             # Check if this is a goal state
             try:
                 is_goal, crop_name = self.problem.is_goal(current_node.state)
-                print(f"Goal check result: is_goal={is_goal}, crop_name={crop_name}")
+                
             except Exception as e:
                 print(f"Error in goal check: {e}")
                 continue
@@ -88,7 +87,7 @@ class GraphSearch:
                 return current_node, crop_name, current_total_cost
 
             if current_node.depth >= max_depth:
-                print(f"Max depth {max_depth} reached, continuing...")
+                
                 continue
 
             # Create state hash for exploration tracking
@@ -102,11 +101,11 @@ class GraphSearch:
                 continue
 
             explored[state_hash] = current_node.cost
-            
+             
             # Get valid actions
             try:
                 valid_actions = self.problem.get_valid_actions(current_node.state)
-                print(f"Found {len(valid_actions) if valid_actions else 0} valid actions")
+                 
             except Exception as e:
                 print(f"Error getting valid actions: {e}")
                 continue

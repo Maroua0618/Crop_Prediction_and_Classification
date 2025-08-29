@@ -28,7 +28,7 @@
 
     <div class="container">
       <div class="results-header">
-        <h2>🌱 Crop Prediction Results</h2>
+        <h2>Crop Prediction Results</h2>
         <p class="subtitle">
           AI-powered crop recommendations based on your environmental conditions
         </p>
@@ -104,7 +104,7 @@
           <div class="alternative-results">
             <div class="result-icon">⚠️</div>
             <div class="result-content">
-              <h4>Alternative Recommendations</h4>
+              <h4>Alternative Recommendation</h4>
               <p class="message">{{ prediction_data.results.astar.message }}</p>
               {% if prediction_data.results.astar.recommendations %}
               <div class="recommendations-list">
@@ -130,6 +130,76 @@
               <p>
                 <strong>Error Details:</strong> {{
                 prediction_data.results.astar.error }}
+              </p>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+
+
+        <!-- Greedy Search Results -->
+        {% if prediction_data.results.greedy %}
+        <div class="algorithm-card Greedy-results">
+          <div class="algorithm-header">
+            <h3>🔍 Greedy Search Algorithm Results</h3>
+            <div class="algorithm-badge">Optimal Path Finding</div>
+          </div>
+
+          {% if prediction_data.results.greedy.success %} {% if
+          prediction_data.results.greedy.perfect_match %}
+          <!-- Perfect Match Found -->
+          <div class="success-result">
+            <div class="result-icon">✅</div>
+            <div class="result-content">
+              <h4>Perfect Match Found!</h4>
+              <div class="recommended-crop">
+                <span class="crop-name"
+                  >{{ prediction_data.results.greedy.perfect_match.crop }}</span
+                >
+                <span class="confidence"
+                  >Optimal Cost: ${{
+                  "%.2f"|format(prediction_data.results.greedy.perfect_match.cost)
+                  }}</span
+                >
+              </div>
+              <p class="message">{{ prediction_data.results.greedy.message }}</p>
+            </div>
+          </div>
+          {% else %}
+          <!-- Alternative Recommendations -->
+          <div class="alternative-results">
+            <div class="result-icon">⚠️</div>
+            <div class="result-content">
+              <h4>Alternative Recommendation</h4>
+              <p class="message">{{ prediction_data.results.greedy.message }}</p>
+              {% if prediction_data.results.greedy.recommendations %}
+              <div class="recommendations-list">
+                {% for rec in prediction_data.results.greedy.recommendations %}
+                <div class="recommendation-item">
+                  <span class="crop-name">{{ rec.crop }}</span>
+                  <span class="cost-indicator"
+                    >Cost: ${{ "%.2f"|format(rec.cost) }}</span
+                  >
+                </div>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %} 
+          {% else %}
+          <!-- Error or No Results -->
+          <div class="error-result">
+            <div class="result-icon">❌</div>
+            <div class="result-content">
+              <p>{{ prediction_data.results.greedy.message }}</p>
+              {% if prediction_data.results.greedy.error %}
+              <p>
+                <strong>Error Details:</strong> {{
+                prediction_data.results.greedy.error }}
               </p>
               {% endif %}
             </div>
@@ -191,29 +261,7 @@
               </div>
             </div>
 
-            <!-- Top Crop Alternatives -->
-            <div class="top-crops-section">
-              <h4>📈 Top Crop Suitability Rankings</h4>
-              <div class="crops-ranking">
-                {% for crop, suitability in
-                prediction_data.results.genetic.top_crops %}
-                <div class="crop-rank-item">
-                  <div class="rank-info">
-                    <span class="crop-name">{{ crop }}</span>
-                    <span class="suitability-score"
-                      >{{ "%.1f"|format(suitability) }}%</span
-                    >
-                  </div>
-                  <div class="suitability-bar">
-                    <div
-                      class="suitability-fill"
-                      style="width: {{ suitability }}%"
-                    ></div>
-                  </div>
-                </div>
-                {% endfor %}
-              </div>
-            </div>
+      
           </div>
           {% else %}
           <!-- Error in Genetic Algorithm -->
@@ -236,7 +284,124 @@
         </div>
         {% endif %}
       </div>
+      
 
+   
+
+<!-- CSP Results -->
+{% if prediction_data.results.csp %}
+<div class="algorithm-card csp-results">
+  <div class="algorithm-header">
+    <h3>🧩 Constraint Satisfaction Problem (CSP) Results</h3>
+    <div class="algorithm-badge">Constraint-Based Optimization</div>
+  </div>
+
+  {% if prediction_data.results.csp.success %}
+  <div class="success-result">
+    <div class="result-icon">✅</div>
+    <div class="result-content">
+      <h4>Top Crop Recommendation!</h4>
+      <p class="message">{{ prediction_data.results.csp.message }}</p>
+      
+      {% if prediction_data.results.csp.data %}
+      <div class="csp-solution">
+        <!-- Top Crop Display -->
+        <div class="recommended-crop">
+          <span class="crop-name">{{ prediction_data.results.csp.data.crop }}</span>
+          <span class="suitability-score">
+            {{ prediction_data.results.csp.data.suitability_percentage }}% Match
+          </span>
+        </div>
+
+        <!-- Matching Conditions -->
+        {% if prediction_data.results.csp.data.matching_conditions %}
+        <div class="conditions-section">
+          <h5>✅ Favorable Conditions:</h5>
+          <div class="conditions-list">
+            {% for condition in prediction_data.results.csp.data.matching_conditions %}
+            <div class="condition-item positive">
+              {{ condition }}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Non-Matching Conditions -->
+        {% if prediction_data.results.csp.data.non_matching_conditions %}
+        <div class="conditions-section">
+          <h5>⚠️ Areas for Improvement:</h5>
+          <div class="conditions-list">
+            {% for condition in prediction_data.results.csp.data.non_matching_conditions %}
+            <div class="condition-item negative">
+              {{ condition }}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Resource Recommendations -->
+        {% if prediction_data.results.csp.data.resources %}
+        <div class="resources-section">
+          <h5>🛠️ Recommended Resources:</h5>
+          <div class="solution-grid">
+            {% for key, value in prediction_data.results.csp.data.resources.items() %}
+            {% if value > 0 %}
+            <div class="solution-item">
+              <span class="solution-label">{{ key.replace('_', ' ').title() }}</span>
+              <span class="solution-value">
+                {% if 'fertilizer' in key %}
+                  {{ value }} kg/ha
+                {% elif key == 'irrigation' %}
+                  {{ value }} mm
+                {% elif key == 'organic_matter' %}
+                  {{ value }} tonnes/ha
+                {% else %}
+                  {{ value }}
+                {% endif %}
+              </span>
+            </div>
+            {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Objective Score -->
+        {% if prediction_data.results.csp.data.objective_score %}
+        <div class="score-section">
+          <span class="score-label">Optimization Score:</span>
+          <span class="score-value">{{ "%.3f"|format(prediction_data.results.csp.data.objective_score) }}</span>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <!-- Error or No Solution -->
+  <div class="error-result">
+    <div class="result-icon">❌</div>
+    <div class="result-content">
+      <h4>No Solution Found</h4>
+      <p>{{ prediction_data.results.csp.message }}</p>
+      {% if prediction_data.results.csp.error %}
+      <p>
+        <strong>Error Details:</strong> {{ prediction_data.results.csp.error }}
+      </p>
+      {% endif %}
+      <p class="csp-explanation">
+        The constraint satisfaction problem could not find a valid assignment 
+        that satisfies all agricultural constraints for the given environmental conditions.
+      </p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+     
       <!-- Action Buttons -->
       <div class="action-buttons">
         <button
@@ -251,9 +416,7 @@
         >
           🎯 Try Classification
         </button>
-        <button onclick="window.print()" class="btn-outline">
-          🖨️ Print Results
-        </button>
+        
         {% if session.user_id %}
         <button onclick="saveResults()" class="btn-outline">
           💾 Save to Profile

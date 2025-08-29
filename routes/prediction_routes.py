@@ -1,13 +1,34 @@
+import numpy as np
 from flask import Blueprint, render_template, request, jsonify, session, flash, redirect, url_for
 from AI_engine.Problem_definition import CropPredictionProblem
 from AI_engine.Astar_Greedy import GraphSearch
 from AI_engine.Genetic import GeneticAlgorithm
+from AI_engine.CSP import run_csp
 import os
 
 prediction_bp = Blueprint('prediction', __name__)
 
 # Create a constant for the data directory
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
+
+def convert_numpy_types(obj):
+    """Recursively convert NumPy types to native Python types for JSON serialization."""
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {key: convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(item) for item in obj]
+    elif isinstance(obj, tuple):
+        return tuple(convert_numpy_types(item) for item in obj)
+    else:
+        return obj
 
 @prediction_bp.route('/prediction')
 def prediction_page():
@@ -60,13 +81,25 @@ def predict_crop():
                 'message': '',
                 'error': None
             },
+            'greedy': {  
+                'success': False,
+                'perfect_match': None,
+                'recommendations': [],
+                'message': '',
+                'error': None
+            },
             'genetic': {
                 'success': False,
                 'best_crop': None,
                 'fitness': 0,
                 'interventions': {},
-                'top_crops': [],
                 'message': '',
+                'error': None
+            },
+            'csp': {  
+                'success': False,
+                'message': '',
+                'data': None,
                 'error': None
             }
         }
@@ -84,7 +117,7 @@ def predict_crop():
                     'success': True,
                     'perfect_match': {
                         'crop': crop_or_list.title(),
-                        'cost': round(cost, 2) if cost else 0
+                        'cost': round(float(cost), 2) if cost else 0
                     },
                     'recommendations': [],
                     'message': f'Perfect match found: {crop_or_list.title()}',
@@ -94,18 +127,20 @@ def predict_crop():
             elif isinstance(crop_or_list, list) and len(crop_or_list) > 0:
                 # Alternative recommendations
                 recommendations = []
-                for item in crop_or_list[:5]:
+                if crop_or_list:
+                    item = crop_or_list[0]   # just take the first item
                     if isinstance(item, tuple) and len(item) >= 3:
                         crop, alt_cost, node_item = item
                         recommendations.append({
                             'crop': crop.title() if isinstance(crop, str) else str(crop),
-                            'cost': round(alt_cost, 2) if alt_cost else 0
+                            'cost': round(float(alt_cost), 2) if alt_cost else 0
                         })
+
                 results['astar'] = {
                     'success': True,
                     'perfect_match': None,
                     'recommendations': recommendations,
-                    'message': 'No perfect match found, showing best alternatives',
+                    'message': 'No perfect match found, showing best alternative',
                     'error': None
                 }
                 print(f"A* Alternatives: {len(recommendations)} found")
@@ -114,7 +149,7 @@ def predict_crop():
                     'success': False,
                     'perfect_match': None,
                     'recommendations': [],
-                    'message': 'No suitable crops found with A* search',
+                    'message': 'No suitable crop found with A* search',
                     'error': None
                 }
                 print("A* No results found")
@@ -128,7 +163,67 @@ def predict_crop():
                 'recommendations': [],
                 'message': f'Error in A* search: {error_msg}'
             }
+            
+        # --- Greedy Search ---
+        print("Starting Greedy Search...")
+        try:
+            graph_search = GraphSearch(problem)
+            node, crop_or_list, cost = graph_search.search("Greedy_search", max_depth=4)
+            print(f"Greedy Search completed. Node: {node}, Result: {crop_or_list}, Cost: {cost}")
 
+            if node and isinstance(crop_or_list, str):
+                # Perfect match found
+                results['greedy'] = {
+                    'success': True,
+                    'perfect_match': {
+                        'crop': crop_or_list.title(),
+                        'cost': round(float(cost), 2) if cost else 0
+                    },
+                    'recommendations': [],
+                    'message': f'Perfect match found: {crop_or_list.title()}',
+                    'error': None
+                }
+                print(f"Greedy Perfect match: {crop_or_list}")
+            elif isinstance(crop_or_list, list) and len(crop_or_list) > 0:
+                # Alternative recommendations
+                recommendations = []
+                if crop_or_list:
+                    item = crop_or_list[0]   # just take the first item
+                    if isinstance(item, tuple) and len(item) >= 3:
+                        crop, alt_cost, node_item = item
+                        recommendations.append({
+                            'crop': crop.title() if isinstance(crop, str) else str(crop),
+                            'cost': round(float(alt_cost), 2) if alt_cost else 0
+                        })
+
+                results['greedy'] = {
+                    'success': True,
+                    'perfect_match': None,
+                    'recommendations': recommendations,
+                    'message': 'No perfect match found, showing best alternative',
+                    'error': None
+                }
+                print(f"Greedy Alternatives: {len(recommendations)} found")
+            else:
+                results['greedy'] = {
+                    'success': False,
+                    'perfect_match': None,
+                    'recommendations': [],
+                    'message': 'No suitable crop found with Greedy search',
+                    'error': None
+                }
+                print("Greedy No results found")
+        except Exception as e:
+            error_msg = str(e)
+            print(f"Greedy Search Error: {error_msg}")
+            results['greedy'] = {
+                'success': False,
+                'error': error_msg,
+                'perfect_match': None,
+                'recommendations': [],
+                'message': f'Error in Greedy search: {error_msg}'
+            }
+            
         # --- Genetic Algorithm ---
         print("Starting Genetic Algorithm...")
         try:
@@ -141,25 +236,13 @@ def predict_crop():
                 if hasattr(problem, 'interventions') and problem.interventions:
                     for i, (intervention_name, _) in enumerate(problem.interventions):
                         if i < len(best_solution):
-                            formatted_interventions[intervention_name] = round(best_solution[i], 1)
-
-                # Ensure top_crops is properly formatted
-                formatted_top_crops = []
-                if top_crops:
-                    for item in top_crops[:5]:
-                        if isinstance(item, tuple) and len(item) >= 2:
-                            crop, score = item
-                            formatted_top_crops.append((
-                                crop.title() if isinstance(crop, str) else str(crop), 
-                                round(float(score), 1)
-                            ))
+                            formatted_interventions[intervention_name] = round(float(best_solution[i]), 1)
 
                 results['genetic'] = {
                     'success': True,
                     'best_crop': best_crop.title() if isinstance(best_crop, str) else str(best_crop),
                     'fitness': round(float(best_fitness), 4),
                     'interventions': formatted_interventions,
-                    'top_crops': formatted_top_crops,
                     'message': f'Best crop with interventions: {best_crop.title() if isinstance(best_crop, str) else str(best_crop)}',
                     'error': None
                 }
@@ -170,7 +253,6 @@ def predict_crop():
                     'best_crop': None,
                     'fitness': 0,
                     'interventions': {},
-                    'top_crops': [],
                     'message': 'Genetic algorithm did not find optimal solution',
                     'error': None
                 }
@@ -178,14 +260,80 @@ def predict_crop():
             error_msg = str(e)
             print(f"Genetic Algorithm Error: {error_msg}")
             results['genetic'] = {
-                'success': False, 
+                'success': False,
                 'error': error_msg,
                 'best_crop': None,
                 'fitness': 0,
                 'interventions': {},
-                'top_crops': [],
                 'message': f'Error in genetic algorithm: {error_msg}'
             }
+            
+        # --- CSP ---
+ 
+        print("Starting CSP...")
+        try:
+            csp_result = run_csp(environmental_data)
+            print("CSP completed.")
+
+            if csp_result:
+                # Get the top crop from alternative_crops
+                alternative_crops = csp_result.get('alternative_crops', {})
+                if alternative_crops:
+                    # Sort crops by percentage suitability and get the top one
+                    sorted_crops = sorted(alternative_crops.items(), 
+                                        key=lambda x: x[1]['percentage'], 
+                                        reverse=True)
+                    top_crop_name, top_crop_data = sorted_crops[0]
+                    
+                    # Create a simplified CSP result with just the top recommendation
+                    simplified_csp_result = {
+                        'crop': top_crop_name.title(),
+                        'suitability_percentage': round(top_crop_data['percentage'], 1),
+                        'matching_conditions': [],
+                        'non_matching_conditions': [],
+                        'solution': csp_result.get('solution', {}),
+                        'resources': csp_result.get('resources', {}),
+                        'environment': csp_result.get('environment', {}),
+                        'objective_score': csp_result.get('objective_score', 0)
+                    }
+                    
+                    # Parse the details to separate matching vs non-matching conditions
+                    for detail in top_crop_data.get('details', []):
+                        if '✓' in detail:
+                            simplified_csp_result['matching_conditions'].append(detail)
+                        else:
+                            simplified_csp_result['non_matching_conditions'].append(detail)
+                    
+                    # Convert to ensure JSON serialization
+                    serializable_csp_result = convert_numpy_types(simplified_csp_result)
+                    
+                    results['csp'] = {
+                        'success': True,
+                        'message': f'Best crop recommendation: {top_crop_name.title()}',
+                        'data': serializable_csp_result
+                    }
+                else:
+                    results['csp'] = {
+                        'success': False,
+                        'message': 'No suitable crops found',
+                        'data': None
+                    }
+            else:
+                results['csp'] = {
+                    'success': False,
+                    'message': 'CSP did not find a solution',
+                    'data': None
+                }
+        except Exception as e:
+            error_msg = str(e)
+            print(f"CSP Error: {error_msg}")
+            results['csp'] = {
+                'success': False,
+                'error': error_msg,
+                'message': f'Error in CSP: {error_msg}'
+            }
+        # Convert all results to ensure JSON serialization
+        results = convert_numpy_types(results)
 
         # Store the prediction data in session with correct structure
         session['prediction_data'] = {
@@ -193,7 +341,7 @@ def predict_crop():
             'results': results
         }
 
-        print(f"Final results: A* success={results['astar']['success']}, GA success={results['genetic']['success']}")
+        print(f"Final results: A* success={bool(results['astar']['success'])}, Greedy success={bool(results['greedy']['success'])}, GA success={bool(results['genetic']['success'])}, CSP success={bool(results['csp']['success'])}")
         return jsonify({'success': True, 'redirect': '/prediction-results'}), 200
 
     except Exception as e:

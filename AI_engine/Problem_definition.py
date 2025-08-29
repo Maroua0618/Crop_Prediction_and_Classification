@@ -371,7 +371,7 @@ class CropPredictionProblem:
     # Functions for Genetic Algorithm
     def apply_interventions(self, chromosome):
         """Apply interventions to user conditions."""
-        if not self.features or not self.dataset:
+        if not self.features or self.dataset is None:  # Changed from 'not self.dataset'
             print("Warning: No features or dataset loaded for GA")
             return {}
             
@@ -393,9 +393,9 @@ class CropPredictionProblem:
                         else:  # Absolute increase (K, ph)
                             state[feature] += param * effect["effect_per_unit"]
         
-        # Cap values
+        # Cap values - Fix the DataFrame boolean context issue
         for f in self.features:
-            if f in state and self.dataset is not None:
+            if f in state and self.dataset is not None and not self.dataset.empty:  # Added explicit empty check
                 min_val, max_val = self.dataset[f].min(), self.dataset[f].max()
                 state[f] = max(min_val, min(max_val, state[f]))
         return state
@@ -423,14 +423,16 @@ class CropPredictionProblem:
         try:
             # Apply interventions
             state = self.apply_interventions(chromosome)
-            if not state:
+            
+            # Check if state is None or empty dict
+            if state is None or len(state) == 0:
                 return 0.0, "unknown"
                 
             # Find closest crop
             closest_crop, distance = self.find_closest_crop(state)
             
-            # Normalize distance
-            if self.dataset is not None and self.features:
+            # Normalize distance - Fix DataFrame boolean context
+            if self.dataset is not None and not self.dataset.empty and self.features:  # Added explicit empty check
                 max_distance = math.sqrt(sum((self.dataset[f].max() - self.dataset[f].min()) ** 2 for f in self.features))
                 distance_score = 1 - (distance / max_distance) if max_distance > 0 else 0
             else:
@@ -455,6 +457,15 @@ class CropPredictionProblem:
             
         try:
             state = self.apply_interventions(chromosome)
+            
+            # Check if state is None or empty dict
+            if state is None or len(state) == 0:
+                return {}
+                
+            # Fix DataFrame boolean context
+            if self.dataset.empty:  # Use explicit empty check
+                return {}
+                
             max_distance = math.sqrt(sum((self.dataset[f].max() - self.dataset[f].min()) ** 2 for f in self.features))
             suitability_scores = {}
             

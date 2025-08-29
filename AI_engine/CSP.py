@@ -2,6 +2,9 @@
 import numpy as np
 from collections import defaultdict, deque
 import pandas as pd
+import os
+
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
 class CSPVariable:
     def __init__(self, name, domain):
         self.name = name
@@ -294,7 +297,7 @@ class CSPSolver:
         return satisfaction
  
 
-def get_crop_requirements_csp(file_path='/data/Crop_Data.csv'):
+def get_crop_requirements_csp(file_path=os.path.join(DATA_DIR, 'Crop_Data.csv')):
     try:
         df = pd.read_csv(file_path)
         if 'label' not in df.columns:
@@ -314,3 +317,43 @@ def get_crop_requirements_csp(file_path='/data/Crop_Data.csv'):
         print(f"Error reading crop data: {e}")
         return None
 
+def run_csp(initial_environment, crop_requirements=None, resource_limits=None, max_iterations=1000, visualize=True, mode="classify"):
+    """
+    Run the CSP solver for crop recommendation.
+
+    Args:
+        initial_environment: Initial environmental conditions (numpy array).
+        crop_requirements: Crop requirements dictionary or None to load from file.
+        resource_limits: Resource constraints dictionary.
+        max_iterations: Maximum iterations for backtracking.
+        visualize: Whether to generate visualizations.
+        mode: 'predict' (return only the best crop with details) or 'classify' (top 5 crops with details and visualization).
+
+    Returns:
+        dict: CSP result dictionary.
+    """
+    if not isinstance(initial_environment, np.ndarray):
+        initial_environment = np.array(initial_environment)
+
+    if crop_requirements is None:
+        crop_requirements = get_crop_requirements_csp()
+    if not crop_requirements:
+        print("Error: Failed to load crop requirements.")
+        return None
+
+    if resource_limits is None:
+        resource_limits = {'fertilizer': 300, 'water': 300, 'organic_matter': 20}
+
+
+    print("\nInitial Environment:")
+    for feature, value in zip(['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall'], initial_environment):
+        print(f"{feature}: {value:.1f}")
+
+    solver = CSPSolver(initial_environment, crop_requirements, resource_limits)
+    result = solver.solve(max_iterations)
+
+    # Sort crops by suitability
+    sorted_crops = sorted(result['alternative_crops'].items(), key=lambda x: x[1]['percentage'], reverse=True)
+        
+
+    return result
