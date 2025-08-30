@@ -67,13 +67,11 @@ class CropPredictionProblem:
             # Handle other cases
             self.initial_state = CropState(list(initial_state))
             
-        print(f"Initialized problem with state type: {type(self.initial_state)}")
-        print(f"Initial state environment: {self.initial_state.environment}")
         
         # Load crop requirements and data
         try:
             self.crop_requirements, self.dataset, self.features, self.crop_profiles = get_crop_requirements(data_file)
-            print(f"Loaded {len(self.crop_requirements)} crop requirements")
+            
         except Exception as e:
             print(f"Error loading crop data: {e}")
             self.crop_requirements = {}

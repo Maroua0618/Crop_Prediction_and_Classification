@@ -96,7 +96,7 @@
                   }}</span
                 >
               </div>
-              <p class="message">{{ prediction_data.results.astar.message }}</p>
+              
             </div>
           </div>
           {% else %}
@@ -105,7 +105,7 @@
             <div class="result-icon">⚠️</div>
             <div class="result-content">
               <h4>Alternative Recommendation</h4>
-              <p class="message">{{ prediction_data.results.astar.message }}</p>
+              
               {% if prediction_data.results.astar.recommendations %}
               <div class="recommendations-list">
                 {% for rec in prediction_data.results.astar.recommendations %}
@@ -125,7 +125,7 @@
           <div class="error-result">
             <div class="result-icon">❌</div>
             <div class="result-content">
-              <p>{{ prediction_data.results.astar.message }}</p>
+              
               {% if prediction_data.results.astar.error %}
               <p>
                 <strong>Error Details:</strong> {{
@@ -165,7 +165,7 @@
                   }}</span
                 >
               </div>
-              <p class="message">{{ prediction_data.results.greedy.message }}</p>
+              
             </div>
           </div>
           {% else %}
@@ -174,7 +174,7 @@
             <div class="result-icon">⚠️</div>
             <div class="result-content">
               <h4>Alternative Recommendation</h4>
-              <p class="message">{{ prediction_data.results.greedy.message }}</p>
+             
               {% if prediction_data.results.greedy.recommendations %}
               <div class="recommendations-list">
                 {% for rec in prediction_data.results.greedy.recommendations %}
@@ -195,7 +195,7 @@
           <div class="error-result">
             <div class="result-icon">❌</div>
             <div class="result-content">
-              <p>{{ prediction_data.results.greedy.message }}</p>
+              
               {% if prediction_data.results.greedy.error %}
               <p>
                 <strong>Error Details:</strong> {{
@@ -268,10 +268,7 @@
           <div class="error-result">
             <div class="result-icon">❌</div>
             <div class="result-content">
-              <p>
-                {{ prediction_data.results.genetic.message or 'Error in genetic
-                algorithm processing' }}
-              </p>
+             
               {% if prediction_data.results.genetic.error %}
               <p>
                 <strong>Error Details:</strong> {{
@@ -301,7 +298,7 @@
     <div class="result-icon">✅</div>
     <div class="result-content">
       <h4>Top Crop Recommendation!</h4>
-      <p class="message">{{ prediction_data.results.csp.message }}</p>
+     
       
       {% if prediction_data.results.csp.data %}
       <div class="csp-solution">
@@ -368,13 +365,7 @@
         </div>
         {% endif %}
 
-        <!-- Objective Score -->
-        {% if prediction_data.results.csp.data.objective_score %}
-        <div class="score-section">
-          <span class="score-label">Optimization Score:</span>
-          <span class="score-value">{{ "%.3f"|format(prediction_data.results.csp.data.objective_score) }}</span>
-        </div>
-        {% endif %}
+        
       </div>
       {% endif %}
     </div>
@@ -385,7 +376,7 @@
     <div class="result-icon">❌</div>
     <div class="result-content">
       <h4>No Solution Found</h4>
-      <p>{{ prediction_data.results.csp.message }}</p>
+      
       {% if prediction_data.results.csp.error %}
       <p>
         <strong>Error Details:</strong> {{ prediction_data.results.csp.error }}

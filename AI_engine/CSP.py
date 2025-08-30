@@ -260,7 +260,7 @@ class CSPSolver:
             'crop': solution.get('Crop', 'None'),
             'resources': {k: v for k, v in solution.items() if k in ['Fertilizer_N', 'Fertilizer_P', 'Fertilizer_K', 'Irrigation', 'Organic_Matter']},
             'environment': {f: csp._compute_environmental_value(solution, f) for f in self.feature_names},
-            'objective_score': csp._evaluate_assignment(solution),
+           
             'alternative_crops': self._rank_alternative_crops(solution, csp),
             'constraint_satisfaction': self._check_constraints(solution, csp)
         }
@@ -344,10 +344,6 @@ def run_csp(initial_environment, crop_requirements=None, resource_limits=None, m
     if resource_limits is None:
         resource_limits = {'fertilizer': 300, 'water': 300, 'organic_matter': 20}
 
-
-    print("\nInitial Environment:")
-    for feature, value in zip(['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall'], initial_environment):
-        print(f"{feature}: {value:.1f}")
 
     solver = CSPSolver(initial_environment, crop_requirements, resource_limits)
     result = solver.solve(max_iterations)

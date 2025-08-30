@@ -132,7 +132,6 @@ class GeneticAlgorithm:
 
     def solve(self, mode="classify"):
         """Run GA."""
-        print(f"Starting GA in {mode} mode...")
         
         # Check if problem has required methods
         if not hasattr(self.problem, 'evaluate'):

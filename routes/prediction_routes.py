@@ -68,7 +68,7 @@ def predict_crop():
             from AI_engine.Problem_definition import CropState
             initial_state = CropState(environmental_data)
             problem = CropPredictionProblem(initial_state, os.path.join(DATA_DIR, 'Crop_Data.csv'))
-            print(f"Problem created successfully. Initial state: {problem.initial_state}")
+            print(f"Problem created successfully.")
         except Exception as e:
             print(f"Error creating problem: {str(e)}")
             return jsonify({'success': False, 'message': f'Error initializing problem: {str(e)}'}), 500
@@ -109,7 +109,7 @@ def predict_crop():
         try:
             graph_search = GraphSearch(problem)
             node, crop_or_list, cost = graph_search.search("A*", max_depth=4)
-            print(f"A* Search completed. Node: {node}, Result: {crop_or_list}, Cost: {cost}")
+            print(f"A* Search completed. Result: {crop_or_list}, Cost: {cost}")
 
             if node and isinstance(crop_or_list, str):
                 # Perfect match found
@@ -143,7 +143,7 @@ def predict_crop():
                     'message': 'No perfect match found, showing best alternative',
                     'error': None
                 }
-                print(f"A* Alternatives: {len(recommendations)} found")
+                
             else:
                 results['astar'] = {
                     'success': False,
@@ -169,7 +169,7 @@ def predict_crop():
         try:
             graph_search = GraphSearch(problem)
             node, crop_or_list, cost = graph_search.search("Greedy_search", max_depth=4)
-            print(f"Greedy Search completed. Node: {node}, Result: {crop_or_list}, Cost: {cost}")
+            print(f"Greedy Search completed. Result: {crop_or_list}, Cost: {cost}")
 
             if node and isinstance(crop_or_list, str):
                 # Perfect match found
@@ -246,7 +246,7 @@ def predict_crop():
                     'message': f'Best crop with interventions: {best_crop.title() if isinstance(best_crop, str) else str(best_crop)}',
                     'error': None
                 }
-                print(f"GA Success: {results['genetic']['best_crop']}")
+                
             else:
                 results['genetic'] = {
                     'success': False,
@@ -294,7 +294,7 @@ def predict_crop():
                         'solution': csp_result.get('solution', {}),
                         'resources': csp_result.get('resources', {}),
                         'environment': csp_result.get('environment', {}),
-                        'objective_score': csp_result.get('objective_score', 0)
+                        
                     }
                     
                     # Parse the details to separate matching vs non-matching conditions

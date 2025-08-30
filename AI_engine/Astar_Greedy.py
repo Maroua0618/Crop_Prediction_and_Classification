@@ -23,7 +23,7 @@ class GraphSearch:
 
     def search(self, search_strategy="A*", max_depth=float('inf'), initial_node=None):
         """Execute the search algorithm."""
-        print(f"Starting {search_strategy} search...")
+        
         
         self.set_frontier(search_strategy)
         
@@ -166,7 +166,7 @@ class GraphSearch:
         if crop_candidates:
             top_crops = sorted(crop_candidates.items(), key=lambda x: x[1][0])[:5]
             top_crops_result = [(crop, total_cost, node) for crop, (total_cost, node) in top_crops]
-            print(f"No exact solution found. Returning top {len(top_crops_result)} crops with lowest total costs after expanding {nodes_expanded} nodes.")
+            
             return None, top_crops_result, None
         else:
             print(f"No crops found after expanding {nodes_expanded} nodes.")
