@@ -1,6 +1,6 @@
 # 🌾 AI-Driven Crop Prediction and Classification System
 
-## 📖 Overview
+## Overview
 
 This project implements a comprehensive AI-driven system for crop prediction and classification that goes beyond simple recommendations. The system analyzes soil conditions, environmental factors, and agricultural parameters to:
 
@@ -12,7 +12,6 @@ This project implements a comprehensive AI-driven system for crop prediction and
 
 Unlike traditional crop recommendation systems that only provide predictions, our approach offers **prescriptive analytics** - when soil conditions aren't optimal for any crop, the system employs advanced search algorithms to recommend the least costly agricultural actions (fertilizers, irrigation, organic matter) to enhance soil properties for better crop matching.
 
----
 
 ## 🎯 Problem Statement
 
@@ -22,7 +21,6 @@ Modern agriculture faces several critical challenges:
 - **Economic Stakes**: Wrong crop-soil pairings reduce yields and waste resources
 - **Decision Complexity**: Farmers must balance multiple competing factors without data-driven support
 
----
 
 ## 🔬 Technical Approach
 
@@ -44,15 +42,13 @@ The system employs four distinct AI approaches, each optimized for different sce
 - Prediction Mode
 
 #### 📊 **Data-Driven Approach**
-- Built on Smart Farming 2024 dataset from Kaggle
+- Built on [Smart Farming Data 2024 (SF24) – Kaggle](https://www.kaggle.com/datasets/datasetengineer/smart-farming-data-2024-sf24)
 - 7 key environmental features selected using Random Forest Feature Importance
   
 #### 💰 **Cost-Benefit Optimization**
 - Economic modeling of agricultural interventions
 - Resource efficiency prioritization
 - Risk assessment and mitigation strategies
-
----
 
 
 ## 🏗️Technology Stack
@@ -74,12 +70,3 @@ The system employs four distinct AI approaches, each optimized for different sce
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-
-### Data Sources
-- **Smart Farming 2024 Dataset** - Kaggle agricultural data collection
-- **Agricultural Research Papers** - Referenced in project documentation
-
-
-
-*Empowering farmers with AI-driven insights for sustainable and profitable agriculture.* 🌱
